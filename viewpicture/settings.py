@@ -9,8 +9,10 @@ https://docs.djangoproject.com/en/6.0/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/6.0/ref/settings/
 """
-
+import os
 from pathlib import Path
+
+from django.conf.global_settings import LOGIN_URL
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -27,6 +29,10 @@ DEBUG = True
 
 ALLOWED_HOSTS = []
 
+LOGIN_URL = "/login/"
+MEDIA_URL = "/media/"
+
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media') #указал где создать папку в проекте и где будет храниться
 
 # Application definition
 
@@ -56,7 +62,7 @@ ROOT_URLCONF = 'viewpicture.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [BASE_DIR / 'templates'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [

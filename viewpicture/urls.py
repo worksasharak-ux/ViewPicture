@@ -22,5 +22,5 @@ from viewpicture.views import *
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('login/', login_), 
-    path('/', include('viewsexplorer.urls')),
+    path('api/', include('viewsexplorer.urls')),
 ]
