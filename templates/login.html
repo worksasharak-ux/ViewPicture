@@ -1,10 +1,88 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ru">
 <head>
+    {% load static %} <!-- 1. Обязательно загружаем библиотеку static -->
     <meta charset="UTF-8">
-    <title>Title</title>
+    <title>Вход</title>
+    <!-- 2. Подключаем сам файл -->
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
 </head>
 <body>
+
+<div class="auth-card">
+    <h2>Вход</h2>
+    <form id="loginForm" method="post">
+        {% csrf_token %}
+        <div class="form-group">
+            <label>Логин</label>
+            <input type="text" name="username" required>
+        </div>
+        <div class="form-group">
+            <label>Пароль</label>
+            <input type="password" name="password" required>
+        </div>
+
+        {% if form.errors %}
+            <div class="errorlist" style="color: red;">Неверный логин или пароль</div>
+        {% endif %}
+
+        <button type="button" id="submitBtn">Войти</button>
+    </form>
+    <div class="footer-link">
+        Нет аккаунта? <a href="{% url 'register_page' %}">Зарегистрироваться</a>
+    </div>
+</div>
+
+<script>
+    // 1. Ищем и кнопку, и форму
+    const form = document.getElementById('loginForm');
+    const submitBtn = document.getElementById('submitBtn');
+
+    // Создаем блок для ошибок, если его нет в HTML
+    let messageDiv = document.getElementById('loginMessage');
+    if (!messageDiv) {
+        messageDiv = document.createElement('div');
+        messageDiv.id = 'loginMessage';
+        form.appendChild(messageDiv);
+    }
+
+    // 2. Вешаем событие именно на КЛИК по кнопке, раз тип кнопки "button"
+    submitBtn.addEventListener('click', async (e) => {
+        console.log("Кнопка нажата!");
+
+        const formData = new FormData(form);
+        const data = Object.fromEntries(formData.entries());
+        const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+
+        try {
+            const response = await fetch("{% url 'login_api' %}", {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': csrfToken
+                },
+                body: JSON.stringify(data)
+            });
+
+            const result = await response.json();
+            console.log("Результат от сервера:", result);
+
+            if (response.ok) {
+                console.log("Успех! Редирект на главную...");
+                window.location.href = "{% url 'category-list' %}"; // Ведем на главную
+            } else {
+                messageDiv.style.color = 'red';
+                messageDiv.style.marginTop = '10px';
+                messageDiv.style.textAlign = 'center';
+                // Вывод ошибки
+                messageDiv.textContent = result.non_field_errors || result.detail || "Неверный логин или пароль";
+            }
+        } catch (error) {
+            console.error("Ошибка сети:", error);
+            messageDiv.textContent = "Ошибка связи с сервером";
+        }
+    });
+</script>
 
 </body>
 </html>
