@@ -1,10 +1,96 @@
+ <!-- 1. Обязательно загружаем библиотеку static -->
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ru">
 <head>
+    {% load static %}
     <meta charset="UTF-8">
-    <title>Title</title>
+    <title>Регистрация</title>
+    <!-- 2. Подключаем сам файл -->
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
 </head>
 <body>
+
+<div class="auth-card">
+    <h2>Регистрация</h2>
+    <form id="registerForm">
+        {% csrf_token %}
+        <div class="form-group">
+            <label>Логин</label>
+            <input type="text" name="username" required>
+        </div>
+        <div class="form-group">
+            <label>Пароль</label>
+            <input type="password" name="password" required>
+        </div>
+        <button type="submit">Создать аккаунт</button>
+        <div id="message"></div>
+    </form>
+    <div class="footer-link">
+        Уже есть аккаунт? <a href="{% url 'login_page' %}">Войти</a>
+    </div>
+</div>
+
+<script>
+    const form = document.getElementById('registerForm');
+    const messageDiv = document.getElementById('message');
+
+    form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        // 1. Находим кнопку и отключаем её
+        const submitBtn = form.querySelector('button');
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Отправка...';
+
+        console.log("Кнопка нажата, начинаем отправку...");
+
+        const formData = new FormData(form);
+        const data = Object.fromEntries(formData.entries());
+        const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+
+        try {
+            console.log("Отправка запроса на:", "{% url 'register_api' %}");
+            const response = await fetch("{% url 'register_api' %}", {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': csrfToken
+                },
+                body: JSON.stringify(data)
+            });
+
+            const result = await response.json();
+            console.log("Ответ от сервера:", result);
+
+            if (response.ok) {
+                messageDiv.style.color = 'green';
+                messageDiv.textContent = 'Успешно! Сейчас вы будете перенаправлены...';
+                form.reset();
+
+                // 2. Задержка перед перенаправлением (1.5 секунды)
+                setTimeout(() => {
+                    window.location.href = "{% url 'login_page' %}"; // Замени на нужный URL
+                }, 1500);
+
+            } else {
+                // Если сервер вернул ошибку — возвращаем кнопку в рабочее состояние
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Создать аккаунт';
+
+                messageDiv.style.color = 'red';
+                messageDiv.textContent = 'Ошибка: ' + JSON.stringify(result);
+            }
+        } catch (error) {
+            // Если произошла ошибка сети — возвращаем кнопку
+            submitBtn.disabled = false;
+            submitBtn.textContent = 'Создать аккаунт';
+
+            console.error("Критическая ошибка:", error);
+            messageDiv.style.color = 'red';
+            messageDiv.textContent = 'Ошибка сети или сервера.';
+        }
+    });
+</script>
 
 </body>
 </html>
