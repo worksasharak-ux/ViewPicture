@@ -1,10 +1,28 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <title>Title</title>
+    <title>Список профилей</title>
+    <style>
+        .profile-card { border: 1px solid #ccc; padding: 10px; margin: 10px 0; }
+    </style>
 </head>
 <body>
+    <h1>Зарегистрированные пользователи</h1>
+
+    {% if profiles %}
+        {% for profile in profiles %}
+            <h4>Посты:</h4>
+            <ul>
+            {% for p in profile.posts %}
+                <li>{{ p.title }}</li>
+            {% endfor %}
+            </ul>
+            <hr>
+        {% endfor %}
+    {% else %}
+        <p>Пользователей пока нет.</p>
+    {% endif %}
 
 </body>
 </html>

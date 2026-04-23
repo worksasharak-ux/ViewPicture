@@ -69,7 +69,7 @@
 
             if (response.ok) {
                 console.log("Успех! Редирект на главную...");
-                window.location.href = "{% url 'category-list' %}"; // Ведем на главную
+                window.location.href = '/api/home'; // Ведем на главную
             } else {
                 messageDiv.style.color = 'red';
                 messageDiv.style.marginTop = '10px';

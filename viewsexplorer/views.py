@@ -26,15 +26,26 @@ class CommentViewSet(viewsets.ModelViewSet):
     queryset = Comment.objects.all()
     serializer_class = CommentSerializer
 
+class UserProfileViewSet(viewsets.ModelViewSet):
+    queryset = UserProfile.objects.all()
+    serializer_class = UserProfileSerializer
 
-class TestViewSet(viewsets.ViewSet):
-    #renderer_classes = [TemplateHTMLRenderer, JSONRenderer]
+class TestViewSet(viewsets.GenericViewSet):
+    queryset = UserProfile.objects.all()
+    serializer_class = UserProfileSerializer
+    renderer_classes = [TemplateHTMLRenderer, JSONRenderer]
+
     def list(self, request):
-        categories = Category.objects.all()
-        pictures = Picture.objects.all()
-        data = {
-            'categories': categories,
-            'pictures': pictures,
-        }
-        serializer = HomePageSerializer(data)
+        queryset = self.get_queryset()
+        serializer = self.get_serializer(queryset, many=True)
+
+        # Если клиент просит HTML (через заголовок Accept или расширение .html)
+        if request.accepted_renderer.format == 'html':
+            #print(serializer.data)
+            return Response(
+                {
+                    'profiles': serializer.data
+                },
+                template_name='home.html'
+            )
         return Response(serializer.data)

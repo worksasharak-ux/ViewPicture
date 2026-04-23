@@ -14,7 +14,7 @@ class Picture(models.Model):
     category = models.ManyToManyField(Category)
     mark = models.BooleanField(default=False)
     image = models.ImageField(null=False, blank=True, upload_to="pictures/")
-    author = models.ForeignKey('UserProfile', on_delete=models.CASCADE)
+    author = models.ForeignKey('UserProfile', on_delete=models.CASCADE, related_name='pictures')
 
     def __str__(self):
         return self.title
@@ -30,13 +30,13 @@ class UserProfile(models.Model):
 
 class Post(models.Model):
     title = models.CharField(max_length=1200)
-    author = models.ForeignKey('UserProfile', on_delete=models.CASCADE)
+    author = models.ForeignKey('UserProfile', on_delete=models.CASCADE, related_name='posts')
     created_at = models.DateTimeField(auto_now_add=True)
     picture = models.ForeignKey('Picture', on_delete=models.CASCADE)
 
 class Comment(models.Model):
     post = models.ForeignKey(Post, on_delete=models.CASCADE)
-    author = models.ForeignKey('UserProfile', on_delete=models.CASCADE)
+    author = models.ForeignKey('UserProfile', on_delete=models.CASCADE, related_name='comments')
     text = models.TextField(blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     picture = models.ImageField(null=True, blank=True)
