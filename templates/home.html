@@ -10,19 +10,18 @@
 <body>
     <h1>Зарегистрированные пользователи</h1>
 
-    {% if profiles %}
-        {% for profile in profiles %}
-            <h4>Посты:</h4>
-            <ul>
-            {% for p in profile.posts %}
-                <li>{{ p.title }}</li>
+    {% if posts %}
+        <h4>Посты:</h4>
+        <ul>
+        {% for post in posts %}
+                <li>{{ post.title }}</li>
+            {% for images in post.pictures %}
+                <li ><img src="{{ images.image }}" width="200" height="200"></li>
             {% endfor %}
-            </ul>
-            <hr>
         {% endfor %}
-    {% else %}
-        <p>Пользователей пока нет.</p>
+        </ul>
+        <hr>
+        {% else %}
     {% endif %}
-
 </body>
 </html>

@@ -1,3 +1,6 @@
+import datetime
+
+from django.db.models.signals import post_init
 from rest_framework import serializers
 from rest_framework.response import Response
 
@@ -14,15 +17,28 @@ class PictureSerializer(serializers.ModelSerializer):
         model = Picture
         fields = '__all__'
 
-class PostSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Post
-        fields = '__all__'
-
 class CommentSerializer(serializers.ModelSerializer):
     class Meta:
         model = Comment
         fields = '__all__'
+
+class PostSerializer(serializers.ModelSerializer):
+    pictures = PictureSerializer(many=True, read_only=True)
+    comments = CommentSerializer(many=True, read_only=True)
+    class Meta:
+        model = Post
+        fields = '__all__'
+
+    def create(self, validated_data): #создание поста
+        post = Post.objects.create(
+            title=validated_data['title'],
+            created_at=datetime.datetime.now(),
+            author=validated_data['author'],
+            pictures=validated_data['pictures'],
+        )
+
+        return post
+
 
 class UserProfileSerializer(serializers.ModelSerializer):
     pictures = PictureSerializer(many=True, read_only=True)

@@ -30,9 +30,9 @@ class UserProfileViewSet(viewsets.ModelViewSet):
     queryset = UserProfile.objects.all()
     serializer_class = UserProfileSerializer
 
-class TestViewSet(viewsets.GenericViewSet):
-    queryset = UserProfile.objects.all()
-    serializer_class = UserProfileSerializer
+class PostsViewSet(viewsets.GenericViewSet):
+    queryset = Post.objects.all()
+    serializer_class = PostSerializer
     renderer_classes = [TemplateHTMLRenderer, JSONRenderer]
 
     def list(self, request):
@@ -44,7 +44,7 @@ class TestViewSet(viewsets.GenericViewSet):
             #print(serializer.data)
             return Response(
                 {
-                    'profiles': serializer.data
+                    'posts': serializer.data
                 },
                 template_name='home.html'
             )

@@ -32,7 +32,7 @@ class Post(models.Model):
     title = models.CharField(max_length=1200)
     author = models.ForeignKey('UserProfile', on_delete=models.CASCADE, related_name='posts')
     created_at = models.DateTimeField(auto_now_add=True)
-    picture = models.ForeignKey('Picture', on_delete=models.CASCADE)
+    pictures = models.ManyToManyField('Picture', blank=False, related_name='posts')
 
 class Comment(models.Model):
     post = models.ForeignKey(Post, on_delete=models.CASCADE)
