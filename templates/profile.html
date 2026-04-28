@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Профиль</title>
+</head>
+<body>
+    {% if data %}
+        <a>{{ username }}</a>
+        {% for images in data.pictures %}
+            <li><img src="{{ images.image }}" width="200" height="200"></li>
+        {% endfor %}
+        <hr>
+    {% else %}
+        <li> {{ error }}</li>
+        <li> {{ message }}</li>
+        <li>
+            <a href="http://127.0.0.1:8000/{{ redirect_url }}">{{ redirect_url }}</a>
+        </li>
+    {% endif %}
+</body>
+</html>
