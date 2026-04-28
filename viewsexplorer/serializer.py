@@ -17,6 +17,15 @@ class PictureSerializer(serializers.ModelSerializer):
         model = Picture
         fields = '__all__'
 
+    # def create(self, validated_data):
+    #     picture = Picture.objects.create(
+    #         title=validated_data['title'],
+    #         author=validated_data['author'],
+    #         image=validated_data['image'],
+    #         created_at=datetime.datetime.now(),
+    #     )
+    #     return picture
+
 class CommentSerializer(serializers.ModelSerializer):
     class Meta:
         model = Comment

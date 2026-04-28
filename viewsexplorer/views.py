@@ -1,4 +1,7 @@
-from django.shortcuts import render
+from email.iterators import typed_subpart_iterator
+
+from django.contrib.auth import logout
+from django.shortcuts import render, redirect
 from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.renderers import TemplateHTMLRenderer, JSONRenderer
@@ -60,8 +63,31 @@ class UserProfileViewSet(viewsets.GenericViewSet):
                 template_name='profile.html'
             )
 
-    def logout(self, request):
+    @action(methods=['post'], detail=False, url_path='addpicture')
+    def addpicture(self, request):
         user_profile = UserProfile.objects.filter(user=request.user).first()
+        serializer = PictureSerializer(data={
+            "title": request.data['title'],
+            "author": user_profile.id,
+            "image": request.FILES['image'],
+        })
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+
+
+
+    @action(methods=['post'], detail=False, url_path='logout')
+    def logout(self, request):
+        logout(request)
+        print(request.user.is_authenticated)
+        if request.accepted_renderer.format == 'html':
+            return redirect("/api/home")
+        return Response(
+            {"detail": "Successfully logged out."},
+            status=status.HTTP_200_OK
+        )
 
 
 
