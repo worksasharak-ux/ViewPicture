@@ -35,8 +35,8 @@ class Post(models.Model):
     pictures = models.ManyToManyField('Picture', blank=False, related_name='posts')
 
 class Comment(models.Model):
-    post = models.ForeignKey(Post, on_delete=models.CASCADE)
-    author = models.ForeignKey('UserProfile', on_delete=models.CASCADE, related_name='comments')
+    post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name='comments')
+    author = models.ForeignKey('UserProfile', on_delete=models.CASCADE, related_name='comments', null=True)
     text = models.TextField(blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     picture = models.ImageField(null=True, blank=True)

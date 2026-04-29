@@ -2,27 +2,625 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <title>Список профилей</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Лента постов</title>
     <style>
-        .profile-card { border: 1px solid #ccc; padding: 10px; margin: 10px 0; }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            text-align: center;
+        }
+
+        .header h1 {
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-top: 15px;
+        }
+
+        .nav-links a {
+            color: #764ba2;
+            text-decoration: none;
+            padding: 8px 16px;
+            border-radius: 10px;
+            transition: all 0.3s;
+            background: #f0f0f0;
+        }
+
+        .nav-links a:hover {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            transform: translateY(-2px);
+        }
+
+        .posts-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 25px;
+        }
+
+        .post-card {
+            background: white;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .post-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(0,0,0,0.3);
+        }
+
+        .post-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+        }
+
+        .post-title {
+            font-size: 1.3em;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+
+        .post-author {
+            font-size: 0.9em;
+            opacity: 0.9;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .post-date {
+            font-size: 0.8em;
+            opacity: 0.8;
+        }
+
+        .post-pictures {
+            padding: 20px;
+            background: #f8f9fa;
+        }
+
+        .pictures-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 10px;
+        }
+
+        .picture-item {
+            overflow: hidden;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: transform 0.3s;
+        }
+
+        .picture-item:hover {
+            transform: scale(1.05);
+        }
+
+        .picture-item img {
+            width: 100%;
+            height: 150px;
+            object-fit: cover;
+        }
+
+        .post-comments {
+            padding: 20px;
+            border-top: 1px solid #e0e0e0;
+            background: #f8f9fa;
+        }
+
+        .comments-title {
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .comments-list {
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .comment-item {
+            background: white;
+            padding: 12px;
+            margin-bottom: 10px;
+            border-radius: 10px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        .comment-author {
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 5px;
+            font-size: 0.9em;
+        }
+
+        .comment-text {
+            color: #333;
+            margin-bottom: 5px;
+            line-height: 1.4;
+        }
+
+        .comment-date {
+            font-size: 0.7em;
+            color: #999;
+        }
+
+        .no-comments {
+            color: #999;
+            text-align: center;
+            padding: 20px;
+            font-style: italic;
+        }
+
+        .add-comment-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 14px;
+            margin-top: 15px;
+            width: 100%;
+            transition: all 0.3s;
+        }
+
+        .add-comment-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .comment-form {
+            margin-top: 15px;
+            display: none;
+        }
+
+        .comment-form.show {
+            display: block;
+        }
+
+        .comment-form textarea {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 14px;
+            resize: vertical;
+            min-height: 80px;
+            font-family: inherit;
+        }
+
+        .comment-form textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .comment-form button {
+            margin-top: 10px;
+            background: #28a745;
+        }
+
+        .char-count {
+            text-align: right;
+            font-size: 12px;
+            color: #999;
+            margin-top: 5px;
+        }
+
+        .char-count.warning {
+            color: #f57c00;
+        }
+
+        .char-count.danger {
+            color: #dc3545;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px;
+            background: white;
+            border-radius: 20px;
+        }
+
+        .empty-state::before {
+            content: "📝";
+            font-size: 64px;
+            display: block;
+            margin-bottom: 20px;
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: white;
+            padding: 15px 25px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            transform: translateX(400px);
+            transition: transform 0.3s;
+            z-index: 1000;
+        }
+
+        .toast.show {
+            transform: translateX(0);
+        }
+
+        .toast.success {
+            border-left: 4px solid #28a745;
+        }
+
+        .toast.error {
+            border-left: 4px solid #dc3545;
+        }
+
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 2px solid #f3f3f3;
+            border-top: 2px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-right: 10px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @media (max-width: 768px) {
+            .posts-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .pictures-grid {
+                grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+            }
+
+            .picture-item img {
+                height: 100px;
+            }
+        }
     </style>
 </head>
 <body>
+    <div class="container">
+        <div class="header">
+            <h1>📱 Лента постов</h1>
+            <p>Делитесь впечатлениями и комментируйте</p>
+            <div class="nav-links">
+                <a href="/api/home/">🏠 Главная</a>
+                <a href="/api/createpost/">✏️ Создать пост</a>
+                <a href="/api/profile/">👤 Мой профиль</a>
+                <a href="/api/pictures/">🖼️ Галерея</a>
+            </div>
+        </div>
 
-    {% if posts %}
-        <h4>Посты:</h4>
-        <ul>
-        {% for post in posts %}
-                <li>{{ post.title }}</li>
-            {% for images in post.pictures %}
-                <li ><img src="{{ images.image }}" width="200" height="200"></li>
-            {% endfor %}
-        {% endfor %}
-        </ul>
-        <hr>
+        {% if posts %}
+            <div class="posts-grid">
+                {% for post in posts %}
+                    <div class="post-card" data-post-id="{{ post.id }}">
+                        <div class="post-header">
+                            <div class="post-title">{{ post.title }}</div>
+                            <div class="post-author">
+                                <span>👤 {{ post.author }}</span>
+                                <span class="post-date">📅 {{ post.created_at|date:"d.m.Y H:i" }}</span>
+                            </div>
+                        </div>
+
+                        {% if post.pictures %}
+                            <div class="post-pictures">
+                                <div class="pictures-grid">
+                                    {% for picture in post.pictures %}
+                                        <div class="picture-item">
+                                            <img src="{{ picture.image }}" alt="Post image" loading="lazy">
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        {% endif %}
+
+                        <div class="post-comments">
+                            <div class="comments-title">
+                                💬 Комментарии
+                                <span class="comment-count" id="comment-count-{{ post.id }}">({{ post.comments|length }})</span>
+                            </div>
+
+                            <div class="comments-list" id="comments-{{ post.id }}">
+                                {% if post.comments %}
+                                    {% for comment in post.comments %}
+                                        <div class="comment-item">
+                                            <div class="comment-author">{{ comment.author_name|default:comment.author }}</div>
+                                            <div class="comment-text">{{ comment.text }}</div>
+                                            <div class="comment-date">{{ comment.created_at|date:"d.m.Y H:i" }}</div>
+                                        </div>
+                                    {% endfor %}
+                                {% else %}
+                                    <div class="no-comments">Пока нет комментариев. Будьте первым!</div>
+                                {% endif %}
+                            </div>
+
+                            <button class="add-comment-btn" onclick="toggleCommentForm({{ post.id }})">
+                                💬 Добавить комментарий
+                            </button>
+
+                            <div class="comment-form" id="comment-form-{{ post.id }}">
+                                <textarea
+                                    id="comment-text-{{ post.id }}"
+                                    placeholder="Напишите ваш комментарий..."
+                                    maxlength="500"
+                                ></textarea>
+                                <div class="char-count" id="char-count-{{ post.id }}">0/500 символов</div>
+                                <button class="add-comment-btn" onclick="submitComment({{ post.id }})" style="background: #28a745;">
+                                    ✨ Отправить
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
         {% else %}
-    {% endif %}
+            <div class="empty-state">
+                <h3>Пока нет постов</h3>
+                <p>Будьте первым, кто создаст пост!</p>
+                <a href="/api/createpost/" style="display: inline-block; margin-top: 20px; padding: 10px 20px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; text-decoration: none; border-radius: 10px;">Создать пост</a>
+            </div>
+        {% endif %}
+    </div>
 
+    <div id="toast" class="toast"></div>
 
+    <script>
+        function toggleCommentForm(postId) {
+            const form = document.getElementById(`comment-form-${postId}`);
+            if (form) {
+                form.classList.toggle('show');
+                // Фокусируемся на textarea при открытии
+                if (form.classList.contains('show')) {
+                    const textarea = document.getElementById(`comment-text-${postId}`);
+                    if (textarea) textarea.focus();
+                }
+            }
+        }
+
+        function updateCharCount(postId) {
+            const textarea = document.getElementById(`comment-text-${postId}`);
+            const charCountSpan = document.getElementById(`char-count-${postId}`);
+
+            if (textarea && charCountSpan) {
+                const length = textarea.value.length;
+                charCountSpan.innerHTML = `${length}/500 символов`;
+
+                if (length > 450) {
+                    charCountSpan.classList.add('warning');
+                    charCountSpan.classList.remove('danger');
+                } else {
+                    charCountSpan.classList.remove('warning');
+                }
+
+                if (length >= 500) {
+                    charCountSpan.classList.add('danger');
+                } else {
+                    charCountSpan.classList.remove('danger');
+                }
+            }
+        }
+
+        async function submitComment(postId) {
+            const textarea = document.getElementById(`comment-text-${postId}`);
+            const commentText = textarea.value.trim();
+
+            if (!commentText) {
+                showToast('Пожалуйста, введите текст комментария', 'error');
+                textarea.focus();
+                return;
+            }
+
+            if (commentText.length > 500) {
+                showToast('Комментарий не может превышать 500 символов', 'error');
+                textarea.focus();
+                return;
+            }
+
+            // Отключаем кнопку
+            const btn = event.target;
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '<span class="loading"></span> Отправка...';
+            btn.disabled = true;
+
+            try {
+                const response = await fetch('/api/home/create_comment/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': getCookie('csrftoken')
+                    },
+                    body: JSON.stringify({
+                        post_id: postId,
+                        text: commentText  // ← поле называется text
+                    })
+                });
+
+                if (response.ok) {
+                    const comment = await response.json();
+                    showToast('✅ Комментарий добавлен!', 'success');
+
+                    // Добавляем комментарий на страницу
+                    addCommentToPage(postId, comment);
+
+                    // Очищаем textarea и обновляем счётчик
+                    textarea.value = '';
+                    updateCharCount(postId);
+
+                    // Закрываем форму
+                    toggleCommentForm(postId);
+
+                } else {
+                    const error = await response.json();
+                    console.error('Ошибка:', error);
+
+                    let errorMessage = 'Не удалось добавить комментарий';
+                    if (error.text) {
+                        errorMessage = error.text.join(', ');
+                    } else if (error.non_field_errors) {
+                        errorMessage = error.non_field_errors.join(', ');
+                    } else if (error.detail) {
+                        errorMessage = error.detail;
+                    }
+
+                    showToast(`❌ Ошибка: ${errorMessage}`, 'error');
+                }
+            } catch (error) {
+                console.error('Ошибка:', error);
+                showToast(`❌ Ошибка: ${error.message}`, 'error');
+            } finally {
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            }
+        }
+
+        function addCommentToPage(postId, comment) {
+            const commentsList = document.getElementById(`comments-${postId}`);
+            const noComments = commentsList.querySelector('.no-comments');
+
+            // Удаляем сообщение "нет комментариев", если оно есть
+            if (noComments) {
+                noComments.remove();
+            }
+
+            // Форматируем дату
+            const date = new Date(comment.created_at);
+            const formattedDate = date.toLocaleString('ru-RU', {
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+
+            // Создаём новый комментарий
+            const commentDiv = document.createElement('div');
+            commentDiv.className = 'comment-item';
+            commentDiv.style.animation = 'fadeIn 0.3s ease';
+            commentDiv.innerHTML = `
+                <div class="comment-author">${escapeHtml(comment.author || 'anonymous')}</div>
+                <div class="comment-text">${escapeHtml(comment.text)}</div>
+                <div class="comment-date">📅 ${formattedDate}</div>
+            `;
+
+            // Добавляем в начало списка
+            commentsList.insertBefore(commentDiv, commentsList.firstChild);
+
+            // Обновляем счётчик комментариев
+            const commentCountSpan = document.getElementById(`comment-count-${postId}`);
+            if (commentCountSpan) {
+                const currentCount = commentsList.children.length;
+                commentCountSpan.textContent = `(${currentCount})`;
+            }
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        function showToast(message, type = 'info') {
+            const toast = document.getElementById('toast');
+            if (!toast) return;
+
+            toast.textContent = message;
+            toast.className = `toast ${type}`;
+            toast.classList.add('show');
+
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        }
+
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+
+        // Добавляем стиль для анимации
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes fadeIn {
+                from {
+                    opacity: 0;
+                    transform: translateY(-10px);
+                }
+                to {
+                    opacity: 1;
+                    transform: translateY(0);
+                }
+            }
+        `;
+        document.head.appendChild(style);
+
+        // Обработка Enter в textarea и обновление счётчика
+        document.addEventListener('DOMContentLoaded', () => {
+            document.querySelectorAll('.comment-form textarea').forEach(textarea => {
+                const postId = textarea.id.split('-').pop();
+
+                // Обновление счётчика при вводе
+                textarea.addEventListener('input', () => updateCharCount(postId));
+
+                // Отправка по Ctrl+Enter или Cmd+Enter
+                textarea.addEventListener('keydown', (e) => {
+                    if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+                        e.preventDefault();
+                        submitComment(postId);
+                    }
+                });
+            });
+        });
+    </script>
 </body>
 </html>

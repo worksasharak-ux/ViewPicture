@@ -2,6 +2,7 @@ from email.iterators import typed_subpart_iterator
 
 from django.contrib.auth import logout
 from django.shortcuts import render, redirect
+from django.template.context_processors import request
 from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.renderers import TemplateHTMLRenderer, JSONRenderer
@@ -124,6 +125,33 @@ class PostsViewSet(viewsets.GenericViewSet):
             )
         return Response(serializer.data)
 
+    @action(methods=['post'], detail=False, url_path='create_comment', renderer_classes=[JSONRenderer])
+    def create_comment(self, request):
+        if request.user.is_authenticated:
+            user_profile = UserProfile.objects.filter(user=request.user).first()
+            #if user_profile is not None:
+            author_id = user_profile.id
+            text = request.data.get('text')
+            serializer = CommentSerializer(data={
+                "author": author_id,
+                "text": text,
+                "created_at": datetime.datetime.now(),
+                "post": request.data.get('post_id'),
+            })
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        else:
+            text = request.data.get('text')
+            serializer = CommentSerializer(data={
+                "author": None,
+                "text": text,
+                "created_at": datetime.datetime.now(),
+                "post": request.data.get('post_id'),
+            })
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 class CreatePostViewSet(viewsets.GenericViewSet): # пока не отрабатывает
     queryset = Post.objects.all()

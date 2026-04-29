@@ -29,7 +29,12 @@ class PictureSerializer(serializers.ModelSerializer):
 class CommentSerializer(serializers.ModelSerializer):
     class Meta:
         model = Comment
-        fields = '__all__'
+        fields = ['id', 'post', 'author', 'text', 'created_at', 'picture']
+        read_only_fields = ['id', 'created_at']
+        extra_kwargs = {
+            'post': {'required': True},
+            'author': {'required': False, 'allow_null': True}
+        }
 
 class PostSerializer(serializers.ModelSerializer):
     pictures = PictureSerializer(many=True)
@@ -47,6 +52,7 @@ class PostSerializer(serializers.ModelSerializer):
     #     )
     #
     #     return post
+
 
 
 class UserProfileSerializer(serializers.ModelSerializer):
