@@ -32,21 +32,21 @@ class CommentSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 class PostSerializer(serializers.ModelSerializer):
-    pictures = PictureSerializer(many=True, read_only=True)
+    pictures = PictureSerializer(many=True)
     comments = CommentSerializer(many=True, read_only=True)
     class Meta:
         model = Post
         fields = '__all__'
 
-    def create(self, validated_data): #создание поста
-        post = Post.objects.create(
-            title=validated_data['title'],
-            created_at=datetime.datetime.now(),
-            author=validated_data['author'],
-            pictures=validated_data['pictures'],
-        )
-
-        return post
+    # def create(self, validated_data): #создание поста
+    #     post = Post.objects.create(
+    #         title=validated_data['title'],
+    #         created_at=datetime.datetime.now(),
+    #         author=validated_data['author'],
+    #         pictures=validated_data['pictures'],
+    #     )
+    #
+    #     return post
 
 
 class UserProfileSerializer(serializers.ModelSerializer):

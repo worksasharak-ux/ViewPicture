@@ -9,12 +9,9 @@ router.register('category', CategoryViewSet, basename='category')
 router.register('picture', PictureViewSet, basename='picture')
 router.register('posts', PostViewSet, basename='posts')
 router.register('comments', CommentViewSet, basename='comments')
-
-
 router.register('profile',UserProfileViewSet, basename='profile')
 router.register('home', PostsViewSet, basename='home')
 router.register('createpost', CreatePostViewSet, basename='createpost')
-
 
 
 urlpatterns = [

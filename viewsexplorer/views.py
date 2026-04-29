@@ -65,16 +65,27 @@ class UserProfileViewSet(viewsets.GenericViewSet):
 
     @action(methods=['post'], detail=False, url_path='addpicture')
     def addpicture(self, request):
-        user_profile = UserProfile.objects.filter(user=request.user).first()
-        serializer = PictureSerializer(data={
-            "title": request.data['title'],
-            "author": user_profile.id,
-            "image": request.FILES['image'],
-        })
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
-
+        if request.user.is_authenticated:
+            user_profile = UserProfile.objects.filter(user=request.user).first()
+            serializer = PictureSerializer(data={
+                "title": request.data['title'],
+                "author": user_profile.id,
+                "image": request.FILES['image'],
+            })
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        else:
+            return Response(
+                {
+                    "error": "unauthorized",
+                    "message": "Пожалуйста, авторизуйтесь",
+                    "redirect_url": "login/",  # Клиент сам решит, как использовать этот URL
+                    "requires_auth": True
+                },
+                status=status.HTTP_401_UNAUTHORIZED,
+                template_name='profile.html'
+            )
 
 
 
@@ -104,7 +115,7 @@ class PostsViewSet(viewsets.GenericViewSet):
 
         # Если клиент просит HTML (через заголовок Accept или расширение .html)
         if request.accepted_renderer.format == 'html':
-            #print(serializer.data)
+            # print(serializer.data)
             return Response(
                 {
                     'posts': serializer.data
@@ -114,10 +125,59 @@ class PostsViewSet(viewsets.GenericViewSet):
         return Response(serializer.data)
 
 
-
-
-
-
 class CreatePostViewSet(viewsets.GenericViewSet): # пока не отрабатывает
     queryset = Post.objects.all()
     serializer_class = PostSerializer
+    renderer_classes = [TemplateHTMLRenderer, JSONRenderer]
+    template_name = 'createpost.html'
+
+    def list(self, request):
+        """Отображение HTML страницы с формой"""
+        return Response({}, template_name=self.template_name)
+
+    @action(methods=['post'], detail=False, url_path='addpost', renderer_classes=[JSONRenderer])
+    def addpost(self, request):
+        user_profile = UserProfile.objects.filter(user=request.user).first()
+
+        if not user_profile:
+            return Response(
+                {"error": "Профиль пользователя не найден"},
+                status=status.HTTP_404_NOT_FOUND
+            )
+
+        title = request.data.get('title')
+        if not title:
+            return Response(
+                {"error": "Название поста обязательно"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        # Создаём пост
+        post = Post.objects.create(
+            title=title,
+            author=user_profile,
+            created_at=datetime.datetime.now(),
+        )
+
+        # Добавляем картинки
+        picture_ids = request.data.get('pictures', [])
+        if picture_ids:
+            pictures = Picture.objects.filter(id__in=picture_ids)
+            post.pictures.set(pictures)
+
+        # Формируем ответ
+        return Response({
+            "id": post.id,
+            "title": post.title,
+            "author": str(user_profile),
+            "pictures": [p.id for p in post.pictures.all()],
+            "created_at": post.created_at
+        }, status=status.HTTP_201_CREATED)
+
+    @action(methods=['get'], detail=False, url_path='getpictures',renderer_classes=[JSONRenderer])
+    def getpictures(self, request):
+        if request.user.is_authenticated:
+            user_profile = UserProfile.objects.filter(user=request.user).first()
+            pictures = Picture.objects.filter(author=user_profile)
+            serializer = PictureSerializer(pictures, many=True)
+            return Response(serializer.data, status=status.HTTP_200_OK)
