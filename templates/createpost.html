@@ -516,16 +516,21 @@
                 }
 
                 try {
+                    // ВАЖНО: отправляем ТОЛЬКО ID, а не полные объекты
+                    const postData = {
+                        title: title,
+                        pictures: this.selectedPictureIds  // ← это массив чисел [1, 2, 3]
+                    };
+
+                    console.log('Отправляемые данные:', postData); // Должно быть {title: "...", pictures: [1,2,3]}
+
                     const response = await fetch('/api/createpost/addpost/', {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
                             'X-CSRFToken': this.getCookie('csrftoken')
                         },
-                        body: JSON.stringify({
-                            title: title,
-                            pictures: this.selectedPictureIds
-                        })
+                        body: JSON.stringify(postData)
                     });
 
                     if (response.status === 401) {
@@ -549,6 +554,7 @@
                         return true;
                     } else {
                         const error = await response.json();
+                        console.error('Ошибка сервера:', error);
                         throw new Error(error.message || error.error || 'Ошибка создания поста');
                     }
                 } catch (error) {

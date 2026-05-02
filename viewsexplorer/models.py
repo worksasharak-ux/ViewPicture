@@ -34,6 +34,12 @@ class Post(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     pictures = models.ManyToManyField('Picture', blank=False, related_name='posts')
 
+    @property
+    def formatted_created_at(self):
+        if self.created_at:
+            return self.created_at.strftime("%d.%m.%Y %H:%M")
+        return 'Дата не указана'
+
 class Comment(models.Model):
     post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name='comments')
     author = models.ForeignKey('UserProfile', on_delete=models.CASCADE, related_name='comments', null=True)

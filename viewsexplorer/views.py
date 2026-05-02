@@ -75,7 +75,7 @@ class UserProfileViewSet(viewsets.GenericViewSet):
             })
             serializer.is_valid(raise_exception=True)
             serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
+            return redirect('/api/profile')
         else:
             return Response(
                 {
@@ -102,11 +102,8 @@ class UserProfileViewSet(viewsets.GenericViewSet):
         )
 
 
-
-
-
 class PostsViewSet(viewsets.GenericViewSet):
-    queryset = Post.objects.all()
+    queryset = Post.objects.all().order_by('-created_at')
     serializer_class = PostSerializer
     renderer_classes = [TemplateHTMLRenderer, JSONRenderer]
 
@@ -116,7 +113,7 @@ class PostsViewSet(viewsets.GenericViewSet):
 
         # Если клиент просит HTML (через заголовок Accept или расширение .html)
         if request.accepted_renderer.format == 'html':
-            # print(serializer.data)
+            print(serializer.data[2].get('created_at'))
             return Response(
                 {
                     'posts': serializer.data
@@ -129,13 +126,12 @@ class PostsViewSet(viewsets.GenericViewSet):
     def create_comment(self, request):
         if request.user.is_authenticated:
             user_profile = UserProfile.objects.filter(user=request.user).first()
-            #if user_profile is not None:
             author_id = user_profile.id
             text = request.data.get('text')
             serializer = CommentSerializer(data={
                 "author": author_id,
                 "text": text,
-                "created_at": datetime.datetime.now(),
+                #"created_at": datetime.datetime.now(),
                 "post": request.data.get('post_id'),
             })
             serializer.is_valid(raise_exception=True)
@@ -146,7 +142,7 @@ class PostsViewSet(viewsets.GenericViewSet):
             serializer = CommentSerializer(data={
                 "author": None,
                 "text": text,
-                "created_at": datetime.datetime.now(),
+                #"created_at": datetime.datetime.now(),
                 "post": request.data.get('post_id'),
             })
             serializer.is_valid(raise_exception=True)
@@ -165,42 +161,21 @@ class CreatePostViewSet(viewsets.GenericViewSet): # пока не отрабат
 
     @action(methods=['post'], detail=False, url_path='addpost', renderer_classes=[JSONRenderer])
     def addpost(self, request):
-        user_profile = UserProfile.objects.filter(user=request.user).first()
+        if request.user.is_authenticated:
+            user_profile = UserProfile.objects.filter(user=request.user).first()
+            author_id = user_profile.id
+            title = request.data.get('title')
+            picture_ids = request.data.get('pictures')
+            serializer = PostSerializer(data={
+                'title': title,
+                'author': author_id,
+                'picture_ids': picture_ids,
+            })
 
-        if not user_profile:
-            return Response(
-                {"error": "Профиль пользователя не найден"},
-                status=status.HTTP_404_NOT_FOUND
-            )
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
 
-        title = request.data.get('title')
-        if not title:
-            return Response(
-                {"error": "Название поста обязательно"},
-                status=status.HTTP_400_BAD_REQUEST
-            )
-
-        # Создаём пост
-        post = Post.objects.create(
-            title=title,
-            author=user_profile,
-            created_at=datetime.datetime.now(),
-        )
-
-        # Добавляем картинки
-        picture_ids = request.data.get('pictures', [])
-        if picture_ids:
-            pictures = Picture.objects.filter(id__in=picture_ids)
-            post.pictures.set(pictures)
-
-        # Формируем ответ
-        return Response({
-            "id": post.id,
-            "title": post.title,
-            "author": str(user_profile),
-            "pictures": [p.id for p in post.pictures.all()],
-            "created_at": post.created_at
-        }, status=status.HTTP_201_CREATED)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
 
     @action(methods=['get'], detail=False, url_path='getpictures',renderer_classes=[JSONRenderer])
     def getpictures(self, request):

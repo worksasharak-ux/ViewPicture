@@ -327,7 +327,6 @@
                 <a href="/api/home/">🏠 Главная</a>
                 <a href="/api/createpost/">✏️ Создать пост</a>
                 <a href="/api/profile/">👤 Мой профиль</a>
-                <a href="/api/pictures/">🖼️ Галерея</a>
             </div>
         </div>
 
@@ -338,8 +337,8 @@
                         <div class="post-header">
                             <div class="post-title">{{ post.title }}</div>
                             <div class="post-author">
-                                <span>👤 {{ post.author }}</span>
-                                <span class="post-date">📅 {{ post.created_at|date:"d.m.Y H:i" }}</span>
+                                <span>👤 {{ post.author_name|default:post.author }}</span>
+                                <span class="post-date">📅 {{ post.created_at}}</span>
                             </div>
                         </div>
 
@@ -367,7 +366,7 @@
                                         <div class="comment-item">
                                             <div class="comment-author">{{ comment.author_name|default:comment.author }}</div>
                                             <div class="comment-text">{{ comment.text }}</div>
-                                            <div class="comment-date">{{ comment.created_at|date:"d.m.Y H:i" }}</div>
+                                            <div class="comment-date">{{ comment.created_at}}</div>
                                         </div>
                                     {% endfor %}
                                 {% else %}

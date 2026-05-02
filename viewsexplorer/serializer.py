@@ -17,42 +17,48 @@ class PictureSerializer(serializers.ModelSerializer):
         model = Picture
         fields = '__all__'
 
-    # def create(self, validated_data):
-    #     picture = Picture.objects.create(
-    #         title=validated_data['title'],
-    #         author=validated_data['author'],
-    #         image=validated_data['image'],
-    #         created_at=datetime.datetime.now(),
-    #     )
-    #     return picture
 
 class CommentSerializer(serializers.ModelSerializer):
+    author_name = serializers.SerializerMethodField()
+    created_at = serializers.DateTimeField(format="%d.%m.%Y %H:%M", read_only=True)
     class Meta:
         model = Comment
-        fields = ['id', 'post', 'author', 'text', 'created_at', 'picture']
-        read_only_fields = ['id', 'created_at']
+        fields = ['id', 'post', 'author','author_name', 'text', 'created_at', 'picture']
+        read_only_fields = ['id', 'created_at', 'author_name']
         extra_kwargs = {
             'post': {'required': True},
             'author': {'required': False, 'allow_null': True}
         }
 
+    def get_author_name(self, obj):
+        if obj.author:
+            return obj.author.get_username()
+        return 'anonymous'
+
 class PostSerializer(serializers.ModelSerializer):
-    pictures = PictureSerializer(many=True)
+    picture_ids = serializers.PrimaryKeyRelatedField(
+        many=True,
+        queryset=Picture.objects.all(),
+        write_only=True,
+        required=False,
+        source='pictures' # Сохраняется в поле pictures
+    )
+
+    pictures = PictureSerializer(many=True, read_only=True)
     comments = CommentSerializer(many=True, read_only=True)
+    author_name = serializers.SerializerMethodField()
+    created_at = serializers.DateTimeField(format="%d.%m.%Y %H:%M", read_only=True)
     class Meta:
         model = Post
-        fields = '__all__'
+        fields = ['id', 'title', 'author','author_name', 'pictures', 'picture_ids', 'comments', 'created_at']
+        read_only_fields = ['id', 'created_at', 'author_name']
+        extra_kwargs = {
+            'author': {'required': False},
+            'comments': {'required': False, 'allow_null': True}
+        }
 
-    # def create(self, validated_data): #создание поста
-    #     post = Post.objects.create(
-    #         title=validated_data['title'],
-    #         created_at=datetime.datetime.now(),
-    #         author=validated_data['author'],
-    #         pictures=validated_data['pictures'],
-    #     )
-    #
-    #     return post
-
+    def get_author_name(self, obj):
+        return obj.author.get_username()
 
 
 class UserProfileSerializer(serializers.ModelSerializer):
@@ -63,4 +69,5 @@ class UserProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = UserProfile
         fields = '__all__'
+
 
