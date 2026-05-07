@@ -1,7 +1,7 @@
 from email.iterators import typed_subpart_iterator
 
 from django.contrib.auth import logout
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.template.context_processors import request
 from rest_framework import viewsets, status
 from rest_framework.decorators import action
@@ -87,6 +87,27 @@ class UserProfileViewSet(viewsets.GenericViewSet):
                 status=status.HTTP_401_UNAUTHORIZED,
                 template_name='profile.html'
             )
+
+    @action(methods=['post'], detail=False, url_path='editpicture')
+    def editpicture(self, request):
+        if request.user.is_authenticated:
+            picture = get_object_or_404(Picture, pk=request.data.get('id'), author__user=request.user)
+            serializer = PictureSerializer(instance=picture, data=request.data, partial=True)
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
+            return redirect('/api/profile')
+        else:
+            return Response(
+                {
+                    "error": "unauthorized",
+                    "message": "Пожалуйста, авторизуйтесь",
+                    "redirect_url": "login/",  # Клиент сам решит, как использовать этот URL
+                    "requires_auth": True
+                },
+                status=status.HTTP_401_UNAUTHORIZED,
+                template_name='profile.html'
+            )
+
 
 
 
@@ -176,6 +197,17 @@ class CreatePostViewSet(viewsets.GenericViewSet): # пока не отрабат
             serializer.save()
 
             return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+        else:
+            return Response(
+                {
+                    "error": "unauthorized",
+                    "message": "Пожалуйста, авторизуйтесь",
+                    "redirect_url": "login/",  # Клиент сам решит, как использовать этот URL
+                    "requires_auth": True
+                },
+                status=status.HTTP_401_UNAUTHORIZED
+            )
 
     @action(methods=['get'], detail=False, url_path='getpictures',renderer_classes=[JSONRenderer])
     def getpictures(self, request):

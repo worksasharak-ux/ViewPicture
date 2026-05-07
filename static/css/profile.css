@@ -1,0 +1,74 @@
+/* Копируем базовые стили из ленты */
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: 100vh;
+    padding: 20px;
+}
+.container { max-width: 1000px; margin: 0 auto; }
+
+/* Шапка профиля */
+.header {
+    background: white;
+    border-radius: 20px;
+    padding: 30px;
+    margin-bottom: 30px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    text-align: center;
+}
+.header h1 { color: #667eea; margin-bottom: 10px; }
+.nav-links { display: flex; gap: 15px; justify-content: center; margin-top: 15px; }
+.nav-links a, .logout-btn {
+    color: #764ba2; text-decoration: none; padding: 8px 16px;
+    border-radius: 10px; transition: 0.3s; background: #f0f0f0; border: none; cursor: pointer;
+}
+.nav-links a:hover, .logout-btn:hover {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white; transform: translateY(-2px);
+}
+
+/* Сетка картинок */
+.section-card {
+    background: white; border-radius: 20px; padding: 25px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.2); margin-bottom: 30px;
+}
+.section-title { color: #667eea; margin-bottom: 20px; font-weight: bold; border-left: 4px solid #764ba2; padding-left: 15px; }
+
+.pictures-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 20px;
+}
+.picture-card {
+    position: relative; border-radius: 15px; overflow: hidden;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1); transition: 0.3s;
+    background: #f8f9fa;
+}
+.picture-card:hover { transform: translateY(-5px); }
+.picture-card img { width: 100%; height: 180px; object-fit: cover; display: block; }
+
+.picture-info { padding: 10px; font-size: 0.9em; text-align: center; }
+
+/* Кнопка редактирования на картинке */
+.edit-badge {
+    position: absolute; top: 10px; right: 10px;
+    background: white; border-radius: 50%; width: 35px; height: 35px;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+}
+
+/* Форма добавления/редактирования */
+.form-group { margin-bottom: 15px; }
+.form-group label { display: block; margin-bottom: 5px; color: #666; }
+.form-group input {
+    width: 100%; padding: 12px; border: 2px solid #f0f0f0;
+    border-radius: 10px; outline: none; transition: 0.3s;
+}
+.form-group input:focus { border-color: #667eea; }
+
+.action-btn {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white; border: none; padding: 12px 25px; border-radius: 10px;
+    cursor: pointer; width: 100%; font-weight: bold;
+}

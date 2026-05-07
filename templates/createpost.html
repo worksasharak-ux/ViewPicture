@@ -1,312 +1,11 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
+    {% load static %}
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Создание поста - Моя Галерея</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            padding: 20px;
-        }
-
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            background: white;
-            border-radius: 20px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-            overflow: hidden;
-        }
-
-        .header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 30px;
-            text-align: center;
-        }
-
-        .header h1 {
-            font-size: 2em;
-            margin-bottom: 10px;
-        }
-
-        .header p {
-            opacity: 0.9;
-        }
-
-        .nav-links {
-            background: #f8f9fa;
-            padding: 15px 30px;
-            border-bottom: 1px solid #e0e0e0;
-            display: flex;
-            gap: 20px;
-            flex-wrap: wrap;
-        }
-
-        .nav-links a {
-            color: #667eea;
-            text-decoration: none;
-            font-weight: 600;
-            transition: color 0.3s;
-        }
-
-        .nav-links a:hover {
-            color: #764ba2;
-        }
-
-        .controls {
-            padding: 30px;
-            background: #f8f9fa;
-            border-bottom: 1px solid #e0e0e0;
-        }
-
-        .input-group {
-            display: flex;
-            gap: 15px;
-            align-items: center;
-            flex-wrap: wrap;
-        }
-
-        .input-group input {
-            flex: 1;
-            padding: 12px 20px;
-            font-size: 16px;
-            border: 2px solid #e0e0e0;
-            border-radius: 10px;
-            transition: all 0.3s;
-        }
-
-        .input-group input:focus {
-            outline: none;
-            border-color: #667eea;
-            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-        }
-
-        .btn {
-            padding: 12px 24px;
-            font-size: 16px;
-            font-weight: 600;
-            border: none;
-            border-radius: 10px;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-
-        .btn-primary {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-        }
-
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
-        }
-
-        .btn-primary:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-            transform: none;
-        }
-
-        .btn-secondary {
-            background: #6c757d;
-            color: white;
-        }
-
-        .btn-secondary:hover {
-            background: #5a6268;
-        }
-
-        .selection-info {
-            margin-top: 15px;
-            padding: 10px;
-            background: white;
-            border-radius: 10px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 10px;
-        }
-
-        .selected-count {
-            font-weight: bold;
-            color: #667eea;
-            font-size: 18px;
-        }
-
-        .badge {
-            background: #28a745;
-            color: white;
-            padding: 5px 10px;
-            border-radius: 20px;
-            font-size: 12px;
-        }
-
-        .gallery {
-            padding: 30px;
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-            gap: 25px;
-            background: white;
-            max-height: 600px;
-            overflow-y: auto;
-        }
-
-        .gallery-item {
-            position: relative;
-            cursor: pointer;
-            border-radius: 15px;
-            overflow: hidden;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-            transition: all 0.3s;
-            background: #f8f9fa;
-        }
-
-        .gallery-item:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
-        }
-
-        .gallery-item.selected {
-            box-shadow: 0 0 0 3px #667eea, 0 0 0 6px rgba(102, 126, 234, 0.3);
-        }
-
-        .gallery-item img {
-            width: 100%;
-            height: 250px;
-            object-fit: cover;
-            display: block;
-        }
-
-        .selection-overlay {
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(102, 126, 234, 0.8);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            opacity: 0;
-            transition: opacity 0.3s;
-            pointer-events: none;
-        }
-
-        .gallery-item.selected .selection-overlay {
-            opacity: 1;
-        }
-
-        .selection-overlay::after {
-            content: "✓";
-            font-size: 48px;
-            color: white;
-            font-weight: bold;
-        }
-
-        .gallery-item-info {
-            padding: 10px;
-            background: white;
-            font-size: 12px;
-            color: #666;
-            text-align: center;
-        }
-
-        .loading {
-            text-align: center;
-            padding: 50px;
-            font-size: 18px;
-            color: #666;
-        }
-
-        .loading::after {
-            content: "...";
-            animation: dots 1.5s steps(4, end) infinite;
-        }
-
-        @keyframes dots {
-            0%, 20% { content: "."; }
-            40% { content: ".."; }
-            60%, 100% { content: "..."; }
-        }
-
-        .empty-gallery {
-            text-align: center;
-            padding: 50px;
-            color: #999;
-        }
-
-        .empty-gallery::before {
-            content: "🖼️";
-            font-size: 64px;
-            display: block;
-            margin-bottom: 20px;
-        }
-
-        .toast {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            background: white;
-            padding: 15px 25px;
-            border-radius: 10px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
-            transform: translateX(400px);
-            transition: transform 0.3s;
-            z-index: 1000;
-        }
-
-        .toast.show {
-            transform: translateX(0);
-        }
-
-        .toast.success {
-            border-left: 4px solid #28a745;
-        }
-
-        .toast.error {
-            border-left: 4px solid #dc3545;
-        }
-
-        .toast.info {
-            border-left: 4px solid #17a2b8;
-        }
-
-        @media (max-width: 768px) {
-            .gallery {
-                grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-                gap: 15px;
-                padding: 15px;
-                max-height: 400px;
-            }
-
-            .gallery-item img {
-                height: 150px;
-            }
-
-            .controls {
-                padding: 15px;
-            }
-
-            .input-group {
-                flex-direction: column;
-            }
-
-            .btn {
-                width: 100%;
-            }
-        }
-    </style>
+    <link rel="stylesheet" href="{% static 'css/createpost.css' %}">
 </head>
 <body>
     <div class="container">
@@ -318,8 +17,6 @@
         <div class="nav-links">
             <a href="/api/home/">🏠 Главная</a>
             <a href="/api/profile/">👤 Мой профиль</a>
-            <a href="/api/picture/">🖼️ Мои картинки</a>
-            <a href="/api/posts/">📝 Мои посты</a>
         </div>
 
         <div class="controls">
@@ -335,7 +32,7 @@
         </div>
 
         <div id="gallery" class="gallery">
-            <div class="loading">Загрузка галереи</div>
+            <div class="loading">Загрузка галереи...</div>
         </div>
     </div>
 
@@ -346,11 +43,12 @@
             constructor() {
                 this.pictures = [];
                 this.selectedPictureIds = [];
+                this.isAuthenticated = false;
                 this.init();
             }
 
             init() {
-                this.loadUserGallery();
+                this.checkAuthAndLoad();
                 this.attachEventListeners();
             }
 
@@ -376,41 +74,91 @@
                 }
             }
 
-            async loadUserGallery() {
+            async checkAuthAndLoad() {
                 const galleryContainer = document.getElementById('gallery');
+                const controls = document.querySelector('.controls');
 
                 try {
-                    // Загружаем картинки пользователя
-                    const response = await fetch('/api/createpost/getpictures/');
+                    // Сначала проверяем авторизацию через отдельный эндпоинт
+                    const authCheckResponse = await fetch('/api/user/check-auth/', {
+                        method: 'GET',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        }
+                    });
 
-                    if (response.status === 401) {
+                    if (authCheckResponse.ok) {
+                        const authData = await authCheckResponse.json();
+                        this.isAuthenticated = authData.is_authenticated;
+                    }
+
+                    if (!this.isAuthenticated) {
+                        // Скрываем форму создания поста
+                        if (controls) controls.style.display = 'none';
+
                         galleryContainer.innerHTML = `
-                            <div class="empty-gallery">
-                                🔒 Пожалуйста, авторизуйтесь<br>
-                                <small><a href="/login/">Войти</a> | <a href="/register/">Регистрация</a></small>
+                            <div class="empty-state" style="grid-column: 1 / -1; background: white; padding: 60px; border-radius: 20px; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.1);">
+                                <div style="font-size: 64px; margin-bottom: 20px;">🔒</div>
+                                <h2 style="color: #667eea; margin-bottom: 15px;">Доступ ограничен</h2>
+                                <p style="color: #666; margin-bottom: 25px;">Чтобы создавать посты и выбирать картинки, необходимо войти в аккаунт.</p>
+                                <div class="nav-links" style="justify-content: center;">
+                                    <a href="/login/" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 12px 30px; text-decoration: none; border-radius: 10px; display: inline-block;">🔑 Войти в профиль</a>
+                                </div>
                             </div>
                         `;
-                        this.showToast('Необходимо авторизоваться', 'error');
                         return;
                     }
 
-                    if (!response.ok) {
-                        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                    // Если пользователь авторизован, загружаем галерею
+                    await this.loadUserGallery();
+
+                } catch (error) {
+                    console.error('Ошибка проверки авторизации:', error);
+                    // В случае ошибки проверки, пробуем загрузить галерею напрямую
+                    await this.loadUserGallery();
+                }
+            }
+
+            async loadUserGallery() {
+                const galleryContainer = document.getElementById('gallery');
+                const controls = document.querySelector('.controls');
+
+                try {
+                    const response = await fetch('/api/createpost/getpictures/');
+
+                    if (response.status === 401) {
+                        // Сервер вернул 401 - пользователь не авторизован
+                        if (controls) controls.style.display = 'none';
+
+                        galleryContainer.innerHTML = `
+                            <div class="empty-state" style="grid-column: 1 / -1; background: white; padding: 60px; border-radius: 20px; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.1);">
+                                <div style="font-size: 64px; margin-bottom: 20px;">🔒</div>
+                                <h2 style="color: #667eea; margin-bottom: 15px;">Требуется авторизация</h2>
+                                <p style="color: #666; margin-bottom: 25px;">Пожалуйста, войдите в аккаунт для доступа к галерее</p>
+                                <div class="nav-links" style="justify-content: center;">
+                                    <a href="/login/" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 12px 30px; text-decoration: none; border-radius: 10px; display: inline-block;">🔑 Войти</a>
+                                    <a href="/register/" style="background: #6c757d; color: white; padding: 12px 30px; text-decoration: none; border-radius: 10px; display: inline-block; margin-left: 10px;">📝 Регистрация</a>
+                                </div>
+                            </div>
+                        `;
+                        return;
                     }
+
+                    if (!response.ok) throw new Error('Ошибка сервера');
 
                     const data = await response.json();
                     this.pictures = Array.isArray(data) ? data : (data.results || []);
-
                     this.renderGallery();
+
                 } catch (error) {
-                    console.error('Ошибка загрузки галереи:', error);
+                    console.error('Ошибка:', error);
                     galleryContainer.innerHTML = `
-                        <div class="empty-gallery">
-                            Ошибка загрузки галереи<br>
-                            <small>${error.message}</small>
+                        <div class="empty-gallery" style="grid-column: 1 / -1;">
+                            ❌ Ошибка загрузки данных: ${error.message}
+                            <br><br>
+                            <button onclick="location.reload()" style="padding: 10px 20px; background: #667eea; color: white; border: none; border-radius: 10px; cursor: pointer;">🔄 Попробовать снова</button>
                         </div>
                     `;
-                    this.showToast('Не удалось загрузить галерею', 'error');
                 }
             }
 
@@ -423,7 +171,7 @@
                             🖼️ У вас пока нет картинок в галерее<br>
                             <small>Загрузите картинки в профиле, чтобы создать пост</small>
                             <br><br>
-                            <a href="/api/profile/" class="btn btn-primary" style="display: inline-block; text-decoration: none; padding: 10px 20px;">Загрузить картинки</a>
+                            <a href="/api/profile/" class="btn btn-primary" style="display: inline-block; text-decoration: none; padding: 10px 20px;">📤 Загрузить картинки</a>
                         </div>
                     `;
                     return;
@@ -441,7 +189,7 @@
                                  onerror="this.src='https://via.placeholder.com/250?text=No+Image'">
                             <div class="selection-overlay"></div>
                             <div class="gallery-item-info">
-                                ${pictureTitle}
+                                ${this.escapeHtml(pictureTitle)}
                             </div>
                         </div>
                     `;
@@ -461,11 +209,11 @@
                 if (this.selectedPictureIds.includes(pictureId)) {
                     this.selectedPictureIds = this.selectedPictureIds.filter(id => id !== pictureId);
                     element.classList.remove('selected');
-                    this.showToast(`Картинка ${pictureId} удалена из выбора`, 'info');
+                    this.showToast(`Картинка удалена из выбора`, 'info');
                 } else {
                     this.selectedPictureIds.push(pictureId);
                     element.classList.add('selected');
-                    this.showToast(`Картинка ${pictureId} добавлена в выбор`, 'success');
+                    this.showToast(`Картинка добавлена в выбор`, 'success');
                 }
 
                 this.updateSelectionUI();
@@ -516,13 +264,12 @@
                 }
 
                 try {
-                    // ВАЖНО: отправляем ТОЛЬКО ID, а не полные объекты
                     const postData = {
                         title: title,
-                        pictures: this.selectedPictureIds  // ← это массив чисел [1, 2, 3]
+                        pictures: this.selectedPictureIds
                     };
 
-                    console.log('Отправляемые данные:', postData); // Должно быть {title: "...", pictures: [1,2,3]}
+                    console.log('Отправляемые данные:', postData);
 
                     const response = await fetch('/api/createpost/addpost/', {
                         method: 'POST',
@@ -533,9 +280,31 @@
                         body: JSON.stringify(postData)
                     });
 
+                    // Обработка ответа от сервера
                     if (response.status === 401) {
-                        this.showToast('❌ Необходимо авторизоваться', 'error');
-                        return false;
+                        const errorData = await response.json();
+
+                        // Проверяем, содержит ли ответ данные о необходимости авторизации
+                        if (errorData.requires_auth || errorData.error === 'unauthorized') {
+                            this.showToast('❌ Необходимо авторизоваться', 'error');
+
+                            // Предлагаем пользователю войти
+                            setTimeout(() => {
+                                const shouldRedirect = confirm('Необходимо войти в аккаунт. Перейти на страницу входа?');
+                                if (shouldRedirect) {
+                                    const redirectUrl = errorData.redirect_url || '/login/';
+                                    window.location.href = redirectUrl;
+                                }
+                            }, 500);
+
+                            return false;
+                        } else {
+                            this.showToast('❌ Сессия истекла, пожалуйста, войдите снова', 'error');
+                            setTimeout(() => {
+                                window.location.href = '/login/';
+                            }, 1500);
+                            return false;
+                        }
                     }
 
                     if (response.ok) {
@@ -604,6 +373,12 @@
                     }
                 }
                 return cookieValue;
+            }
+
+            escapeHtml(text) {
+                const div = document.createElement('div');
+                div.textContent = text;
+                return div.innerHTML;
             }
         }
 

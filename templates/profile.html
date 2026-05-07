@@ -1,50 +1,108 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ru">
 <head>
+    {% load static %}
     <meta charset="UTF-8">
-    <title>Профиль</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Мой профиль</title>
+    <link rel="stylesheet" href="{% static 'css/profile.css' %}">
+
 </head>
 <body>
-    {% if data %}
-        <a>{{ username }}</a>
-        {% for images in data.pictures %}
-            <li><img src="{{ images.image }}" width="200" height="200"></li>
-        {% endfor %}
-        <hr>
-    {% else %}
-        <li> {{ error }}</li>
-        <li> {{ message }}</li>
-        <li>
-            <a href="http://127.0.0.1:8000/{{ redirect_url }}">{{ redirect_url }}</a>
-        </li>
-    {% endif %}
 
-    {% if request.user.is_authenticated %}
-        <!-- Форма отображается ТОЛЬКО для авторизованных пользователей -->
-        <h2>Добавить новую картинку</h2>
+<div class="container">
+    <div class="header">
+        <h1>👤 Профиль: {{ username }}</h1>
+        <div class="nav-links">
+            <a href="/api/home/">🏠 На главную</a>
+            <form action="{% url 'profile-logout' %}" method="post" style="display:inline;">
+                {% csrf_token %}
+                <button type="submit" class="logout-btn">🚪 Выйти</button>
+            </form>
+        </div>
+    </div>
 
-        <form method="post" action="{% url 'profile-addpicture' %}" enctype="multipart/form-data">
+    <!-- Список моих картинок -->
+    <div class="section-card">
+        <h2 class="section-title">Моя галерея</h2>
+        {% if data.pictures %}
+            <div class="pictures-grid">
+                {% for img in data.pictures %}
+                <div class="picture-card">
+                    <img src="{{ img.image }}" alt="{{ img.title }}">
+                    <div class="picture-info">{{ img.title }}</div>
+                    <div class="edit-badge" onclick="setupEdit('{{ img.id }}', '{{ img.title }}')">✏️</div>
+                </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="header">
+                <h1 style="color: #dc3545;">⚠ {{ error }}</h1>
+                <p>{{ message }}</p>
+                <div class="nav-links">
+                    <!-- Здесь создается ссылка из redirect_url -->
+                    <a href="/{{ redirect_url }}">Перейти ко входу</a>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+
+    <!-- Форма (универсальная: и для добавления, и для редактирования) -->
+    <div class="section-card" id="form-section">
+        <h2 class="section-title" id="form-header">Добавить новую картинку</h2>
+        <form id="main-form" method="post" action="{% url 'profile-addpicture' %}" enctype="multipart/form-data">
             {% csrf_token %}
+            <input type="hidden" name="id" id="field-id">
 
             <div class="form-group">
-                <label for="title">Название картинки:</label>
-                <input type="text" id="title" name="title" required class="form-control">
+                <label for="title">Название</label>
+                <input type="text" name="title" id="field-title" required placeholder="Как назовем?">
             </div>
 
             <div class="form-group">
-                <label for="image">Выберите изображение:</label>
-                <input type="file" id="image" name="image" accept="image/*" required class="form-control">
+                <label for="image">Изображение</label>
+                <input type="file" name="image" id="field-image" accept="image/*">
+                <small id="hint" style="display:none; color: #888;">Оставьте пустым, если не хотите менять фото</small>
             </div>
 
-            <button type="submit" class="btn btn-primary">Загрузить картинку</button>
+            <button type="submit" class="action-btn" id="submit-btn">Загрузить в галерею</button>
+            <button type="button" id="cancel-btn" onclick="resetForm()"
+                    style="display:none; width:100%; margin-top:10px; background:none; border:none; color:#999; cursor:pointer;">
+                Отмена (вернуться к созданию)
+            </button>
         </form>
-    {% endif %}
+    </div>
+</div>
 
-    {% if request.user.is_authenticated %}
-        <form method="post" action="{% url 'profile-logout' %}">
-            {% csrf_token %}
-            <button type="submit" class="btn btn-danger">Выйти</button>
-        </form>
-    {% endif %}
+<script>
+    function setupEdit(id, title) {
+        // Переключаем форму в режим редактирования
+        document.getElementById('form-header').innerText = 'Редактировать: ' + title;
+        document.getElementById('field-id').value = id;
+        document.getElementById('field-title').value = title;
+        document.getElementById('field-image').required = false;
+        document.getElementById('hint').style.display = 'block';
+        document.getElementById('submit-btn').innerText = 'Сохранить изменения';
+        document.getElementById('cancel-btn').style.display = 'block';
+
+        // Меняем URL на редактирование
+        document.getElementById('main-form').action = "{% url 'profile-editpicture' %}";
+
+        // Скроллим к форме
+        document.getElementById('form-section').scrollIntoView({ behavior: 'smooth' });
+    }
+
+    function resetForm() {
+        document.getElementById('form-header').innerText = 'Добавить новую картинку';
+        document.getElementById('main-form').reset();
+        document.getElementById('field-id').value = '';
+        document.getElementById('field-image').required = true;
+        document.getElementById('hint').style.display = 'none';
+        document.getElementById('submit-btn').innerText = 'Загрузить в галерею';
+        document.getElementById('cancel-btn').style.display = 'none';
+        document.getElementById('main-form').action = "{% url 'profile-addpicture' %}";
+    }
+</script>
+
 </body>
 </html>
