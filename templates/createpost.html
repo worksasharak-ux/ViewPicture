@@ -79,13 +79,6 @@
                 const controls = document.querySelector('.controls');
 
                 try {
-                    // Сначала проверяем авторизацию через отдельный эндпоинт
-                    const authCheckResponse = await fetch('/api/user/check-auth/', {
-                        method: 'GET',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        }
-                    });
 
                     if (authCheckResponse.ok) {
                         const authData = await authCheckResponse.json();

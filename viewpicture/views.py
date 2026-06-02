@@ -10,7 +10,6 @@ from django.contrib.auth import get_user_model, login
 
 user = get_user_model()
 
-
 def register_page(request):
     return render(request, 'register.html')
 def login_page(request):
@@ -24,8 +23,10 @@ class RegisterView(generics.CreateAPIView):
     def create(self, request, *args, **kwargs): #ответ в http
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        serializer.save()
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
+        temp_user = serializer.save()
+        return Response({
+            'username': temp_user.username,
+        }, status=status.HTTP_201_CREATED)
 
 class LoginView(APIView):
     permission_classes = (AllowAny,)
@@ -34,9 +35,6 @@ class LoginView(APIView):
     def post(self, request, *args, **kwargs):
         serializer = self.serializer_class(data=request.data)
         serializer.is_valid(raise_exception=True)
-
         user = serializer.validated_data['user']
-
         login(request, user)
-
         return Response(serializer.data, status=status.HTTP_200_OK)
