@@ -17,7 +17,7 @@ class RegisterSerializer(serializers.ModelSerializer):
             password=validated_data['password']
         )
         prof, created = UserProfile.objects.get_or_create(user=tempuser)
-        return user
+        return tempuser
 
 class LoginSerializer(serializers.ModelSerializer):
     username = serializers.CharField(write_only=True)

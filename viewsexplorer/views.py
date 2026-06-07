@@ -1,5 +1,3 @@
-from asyncio.windows_events import NULL
-
 from django.contrib.auth import logout
 from django.shortcuts import render, redirect, get_object_or_404
 from rest_framework import viewsets, status
@@ -8,25 +6,25 @@ from rest_framework.renderers import TemplateHTMLRenderer, JSONRenderer
 
 from .serializer import *
 
-# class CategoryViewSet(viewsets.ModelViewSet):
-#     queryset = Category.objects.all()
-#     serializer_class = CategorySerializer
-#
-#     def list(self, request, *args, **kwargs): # переопределяем queryset
-#         self.queryset = self.queryset.filter()
-#         return super().list(request, *args, **kwargs)
-#
-# class PictureViewSet(viewsets.ModelViewSet):
-#     queryset = Picture.objects.all()
-#     serializer_class = PictureSerializer
-#
-# class PostViewSet(viewsets.ModelViewSet):
-#     queryset = Post.objects.all()
-#     serializer_class = PostSerializer
-#
-# class CommentViewSet(viewsets.ModelViewSet):
-#     queryset = Comment.objects.all()
-#     serializer_class = CommentSerializer
+class CategoryViewSet(viewsets.ModelViewSet):
+    queryset = Category.objects.all()
+    serializer_class = CategorySerializer
+
+    def list(self, request, *args, **kwargs): # переопределяем queryset
+        self.queryset = self.queryset.filter()
+        return super().list(request, *args, **kwargs)
+
+class PictureViewSet(viewsets.ModelViewSet):
+    queryset = Picture.objects.all()
+    serializer_class = PictureSerializer
+
+class PostViewSet(viewsets.ModelViewSet):
+    queryset = Post.objects.all()
+    serializer_class = PostSerializer
+
+class CommentViewSet(viewsets.ModelViewSet):
+    queryset = Comment.objects.all()
+    serializer_class = CommentSerializer
 
 class UserProfileViewSet(viewsets.GenericViewSet):
     serializer_class = UserProfileSerializer
@@ -39,12 +37,14 @@ class UserProfileViewSet(viewsets.GenericViewSet):
             serializer = self.get_serializer(queryset, many=False)# если мэни фолс - то будет не список объектов
 
             if request.accepted_renderer.format == 'html':
-                return Response(
-                    {
-                        "data": serializer.data,
-                        "username": queryset.get_username(),
-                    }
-                )
+                #if serializer.data is not None:
+                    return Response(
+                        {
+                            "data": serializer.data,
+                            "username": queryset.get_username(),
+                        }
+                    )
+
 
             return Response(serializer.data)
         else:
@@ -191,6 +191,26 @@ class CreatePostViewSet(viewsets.GenericViewSet):
             author_id = user_profile.id
             title = request.data.get('title')
             picture_ids = request.data.get('pictures')
+            # проблема возникла при создании суперадмина. Для него нет профиля
+            # Из-за этого не совпадают id юзеров из модели users и моей модели.
+            # Решением является либо удаление полностью базы и создания новой, либо через костыль.
+            # пока сделал через костыль
+            for picture_id in picture_ids:
+                print(Picture.objects.filter(id=picture_id).first().author)
+                print(request.user)
+                print(picture_id)
+                print(request.user.id -1)
+                print(Picture.objects.filter(id=picture_id).first().author.id)
+                if request.user.id - 1 != Picture.objects.filter(id=picture_id).first().author.id:
+                    return Response(
+                        {
+                            "error": "Bad request",
+                            "message": "Ошибка в передаваемых данных",
+                            "redirect_url": "login/",
+                            "requires_auth": True
+                        },
+                        status=status.HTTP_400_BAD_REQUEST
+                    )
 
             serializer = PostSerializer(data={
                 'title': title,

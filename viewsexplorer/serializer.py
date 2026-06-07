@@ -1,9 +1,7 @@
 import datetime
-
 from django.db.models.signals import post_init
 from rest_framework import serializers
 from rest_framework.response import Response
-
 from .models import  *
 
 class CategorySerializer(serializers.ModelSerializer):
@@ -16,7 +14,6 @@ class PictureSerializer(serializers.ModelSerializer):
     class Meta:
         model = Picture
         fields = '__all__'
-
 
 class CommentSerializer(serializers.ModelSerializer):
     author_name = serializers.SerializerMethodField()
@@ -60,7 +57,6 @@ class PostSerializer(serializers.ModelSerializer):
     def get_author_name(self, obj):
         return obj.author.get_username()
 
-
 class UserProfileSerializer(serializers.ModelSerializer):
     pictures = PictureSerializer(many=True, read_only=True)
     posts = PostSerializer(many=True, read_only=True)
@@ -69,5 +65,3 @@ class UserProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = UserProfile
         fields = '__all__'
-
-
